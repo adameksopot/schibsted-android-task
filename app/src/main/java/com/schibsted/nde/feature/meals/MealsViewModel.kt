@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.schibsted.nde.data.MealsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -23,10 +25,31 @@ class MealsViewModel @Inject constructor(
     }
 
     fun loadMeals() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _state.emit(_state.value.copy(isLoading = true))
-            val meals = mealsRepository.getMeals()
-            _state.emit(_state.value.copy(meals = meals, filteredMeals = meals))
+
+            mealsRepository.getMeals()
+                .collect { mealsFromDb ->
+                    if (mealsFromDb.isNotEmpty()) {
+                        _state.emit(
+                            _state.value.copy(
+                                meals = mealsFromDb,
+                                filteredMeals = mealsFromDb,
+                                isLoading = false
+                            )
+                        )
+                    } else {
+                        fetchMealsFromNetworkAndSave()
+                    }
+                }
+        }
+    }
+
+    private suspend fun fetchMealsFromNetworkAndSave() {
+        try { mealsRepository.fetchMeals()
+
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
             _state.emit(_state.value.copy(isLoading = false))
         }
     }
