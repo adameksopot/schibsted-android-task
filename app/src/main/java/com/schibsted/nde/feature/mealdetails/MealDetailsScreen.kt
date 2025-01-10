@@ -45,43 +45,56 @@ fun MealDetailsContent(viewModel: MealDetailsViewModel) {
     val state by viewModel.state.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize()) {
-        state.meal?.let { meal ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-            ) {
-                MealImage(
-                    thumb = meal.strMealThumb,
-                    modifier = Modifier
-                        .height(240.dp)
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(8.dp))
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = meal.strMeal,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-                Text(
-                    text = "Cooking Instructions:",
-                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
-                )
-
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    val instructions = meal.strInstructions?.split(". ") ?: listOf("No instructions available.")
-                    items(instructions) { step ->
+        if (state.isError) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = step,
-                            modifier = Modifier.padding(vertical = 4.dp)
+                            text = "Failed to load meal details. Please try again.",
+                            modifier = Modifier.padding(16.dp)
                         )
+
                     }
                 }
-            }
-        } ?: run {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Loading meal details...")
+        } else {
+            state.meal?.let { meal ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp)
+                ) {
+                    MealImage(
+                        thumb = meal.strMealThumb,
+                        modifier = Modifier
+                            .height(240.dp)
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = meal.strMeal,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    Text(
+                        text = "Cooking Instructions:",
+                        modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+                    )
+
+                    LazyColumn(modifier = Modifier.fillMaxSize()) {
+                        val instructions = meal.strInstructions?.split(". ")
+                            ?: listOf("No instructions available.")
+                        items(instructions) { step ->
+                            Text(
+                                text = step,
+                                modifier = Modifier.padding(vertical = 4.dp)
+                            )
+                        }
+                    }
+                }
+            } ?: run {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Loading meal details...")
+                }
             }
         }
     }

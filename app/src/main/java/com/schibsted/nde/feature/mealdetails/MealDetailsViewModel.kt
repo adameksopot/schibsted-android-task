@@ -7,6 +7,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,6 +25,11 @@ class MealDetailsViewModel @AssistedInject constructor(
         fun create(id: Int): MealDetailsViewModel
     }
 
+    private val exceptionHandler = CoroutineExceptionHandler { _, _ ->
+        val newState = _state.value.copy(isError = true)
+        _state.value = newState
+    }
+
     private val _state = MutableStateFlow(SingleMealViewState())
 
     val state: StateFlow<SingleMealViewState>
@@ -34,7 +40,7 @@ class MealDetailsViewModel @AssistedInject constructor(
     }
 
     private fun loadMeal(id: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO + exceptionHandler) {
             val meal = mealsRepository.getMealById(id)
             _state.value = SingleMealViewState(meal)
         }

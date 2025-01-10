@@ -4,4 +4,5 @@ import com.schibsted.nde.model.MealResponse
 
 data class SingleMealViewState(
     val meal: MealResponse? = null,
+    val isError: Boolean = false,
 )
