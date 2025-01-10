@@ -27,6 +27,8 @@ class MealsRepository @Inject constructor(
         mealEntityDao.insertMeals(mappedMeals)
     }
 
+    suspend fun getMealById(id: Int): MealResponse = mapMealEntityToResponse(mealEntityDao.getMealById(id))
+
     private fun mapMealResponseToEntity(meal: MealResponse): MealEntity {
         return MealEntity(
             id = meal.idMeal,

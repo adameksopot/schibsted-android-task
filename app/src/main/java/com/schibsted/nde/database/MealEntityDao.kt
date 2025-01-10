@@ -13,4 +13,7 @@ interface MealEntityDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMeals(meals: List<MealEntity>)
+
+    @Query("SELECT * FROM meal WHERE id = :mealId")
+    suspend fun getMealById(mealId: Int): MealEntity
 }
