@@ -46,8 +46,8 @@ class MealsViewModel @Inject constructor(
     }
 
     private suspend fun fetchMealsFromNetworkAndSave() {
-        try { mealsRepository.fetchMeals()
-
+        try {
+            mealsRepository.fetchMeals()
         } catch (e: Exception) {
             if (e is CancellationException) throw e
             _state.emit(_state.value.copy(isLoading = false))
@@ -55,13 +55,13 @@ class MealsViewModel @Inject constructor(
     }
 
     fun submitQuery(query: String?) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.Default) {
             val filteredMeals = if (query?.isNotBlank() == true) {
-                _state.value.meals
-            } else {
                 _state.value.meals.filter {
-                    it.strMeal.lowercase().contains(query?.lowercase() ?: "")
+                    it.strMeal.lowercase().contains(query.lowercase())
                 }
+            } else {
+                _state.value.meals
             }
             _state.emit(_state.value.copy(query = query, filteredMeals = filteredMeals))
         }
